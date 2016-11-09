@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Register for Prewired</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <link rel="stylesheet" type="text/css" href="//necolas.github.io/normalize.css/5.0.0/normalize.css">
+        <meta name="description" content="Sign up for Prewired">
+    </head>
+    <body id=registerpage>
+        <center>
+            <!--[if lte IE 7 ]>
+              <font color=red size=60> Your browser is not supported! Please upgrade to a more modern browser.</font><br>
+            <![endif]-->
+            <img src="//www.prewired.org/img/scotlandcol2.png" id=logo alt="PREWIRED">
+            {% if err %} <p style="color: red"> Please make sure you fill in all the required fields </p> {% endif %}
+        </center>
+        <div id=contentdiv>
+            <h2 style="text-align: center;"> Register for Prewired </h2>
+            <p  style="text-align: center;"> Fields marked with <span style="color: red">*</span> are required. </p>
+            <form method=POST>
+                <table>
+                    <tbody>
+                        {% for field in fields %}
+                            {% if field.pad %} <tr><td><br></td><td></td></tr> {% endif %}
+                            <tr>
+                                <td class=regfieldname> 
+                                    {% if field.indent %} &nbsp;&nbsp;&nbsp;&nbsp; {% endif %}
+                                    {{ field.dispname }}
+                                    {%- if field.required -%} <span style="color: red">*</span> {% endif %}
+                                </td>
+                                <td> <input type="{{ field.type }}" name="{{ field.intname }}" value="" 
+                                                                                            {%- if field.required %} required {% endif %}> </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <br><br>The member may be photographed and/or filmed during Prewired events, and these
+                photographs/films may be used in print or online publicity for future Prewired events.<span style="color: red">*</span><br>
+                <input type=radio name=photo value=yes required> I understand<br>
+                <input type=radio name=photo value=no required> I do not consent (please get in touch with us about this!)<br><br>
+                You give Prewired permission to store these details, printed or electronically for
+                as long as Prewired deems necessary for the successful running of Prewired.<span style="color: red">*</span><br>
+                <input type=checkbox name=storage required> I understand<br><br>
+                You agree that these details are correct and up to date, and to notify
+                Prewired by email (hello@prewired.org) if any of the details change.<span style="color: red">*</span><br>
+                <input type=checkbox name=update required> I understand<br><br>
+                This form is being filled out by... <span style="color: red">*</span><br>
+                <input type=radio name=registered_by value=parent required>
+                A parent or guardian of an attendee (required for attendees aged younger than 14)<br>
+                <input type=radio name=registered_by value=attendee required> An attendee between the ages of 14 and 18 (inclusive)<br><br>
+                <center><input type=submit value="Register"></center>
+            </form>
+            <br><br><br>
+            <br><br><br>
+            <br><br><br>
+        </div>
+    </body>
+</html>

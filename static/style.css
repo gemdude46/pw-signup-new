@@ -1,0 +1,132 @@
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background-color: #EDEDED;
+    background-image: url("//www.prewired.org/img/dimension.png");
+    background-repeat: repeat;
+}
+
+#logo {
+    height: 200px;
+    margin: 2em;
+}
+
+.error {
+    width: 40%;
+    border: 5px solid #f00;
+    background-color: #EDEDED;
+    color: red;
+    padding: 1em;
+}
+
+#index center {
+    opacity: 0;
+}
+
+.dispobj {
+    opacity: 0;
+    text-align: center;
+    transition: opacity 1s;
+}
+
+.dispobj#logo {
+    height: 30vh;
+    margin: 1em;
+    margin-left: calc(50vw - 9.31vh);
+}
+
+.dispobj:nth-child(4) {
+    font-size: 150%;
+}
+
+.dispobj > input {
+    font-size: 100%;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+#button {
+    transition: opacity 1s, background-color 0.5s;
+    background-color: #ff0000;
+    position: absolute;
+    border-radius: 1em;
+    cursor: pointer;
+    bottom: 18vh;
+    left: 37.5vw;
+    margin: -1em;
+    padding: 1em;
+    color: white;
+    width: 25vw;
+}
+
+#button:hover {
+    background-color: #ff3333;
+}
+
+a.dispobj {
+    color: black;
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    bottom: 5px;
+    cursor: auto;
+    text-decoration: none;
+    outline: 0;
+}
+
+a.dispobj > span {
+    color: #0000EE;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#ierr {
+    position: absolute;
+    width: 350px;
+    left: calc(50% - 175px);
+    box-shadow: 10px 10px 5px gray;
+    padding: 2em;
+    background-color: #ff0000;
+    bottom: 120%;
+    color: white;
+    transition: bottom 1s ease-out;
+}
+
+#ierr > button {
+    float: right;
+}
+
+#contentdiv {
+    width: 70%;
+    margin-left: 15%;
+}
+
+.regfieldname {
+    width: 60%;
+}
+
+.regfieldname + td {
+    float: right;
+}
+
+#registerpage table, #registerpage tbody, #registerpage tr {
+    width: 100%;
+}
+
+#registercomplete, #signedup {
+    height: auto !important;
+}
+
+#registercomplete > *, #signedup > * {
+    text-align: center;
+}
+
+#registercomplete a {
+    text-decoration: none;
+    font-size: 110%;
+    font-weight: 500;
+}
