@@ -257,6 +257,9 @@ def who_is():
 				(unichr(160)*4 if f.get('indent') else '') + f['dispname'],
 				'' if f['intname'].startswith('ignore') else m.__dict__[f['intname']]
 			] for f in cfg.fields
+		] + [
+			['Consents to photos', str(m.photo)],
+			['Registered by a parent or guardian', str(m.by_parent)]
 		]
 	)
 
