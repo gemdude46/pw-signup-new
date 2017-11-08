@@ -2,18 +2,18 @@
 <h1> You must be an admin to access this page </h1>
 
 <script>
-    
-    function L(){
-        x = new XMLHttpRequest();
-        x.open('POST', '{{ url_for("gimme") }}', false);
-        x.send(document.querySelector('input').value);
-        
-        if (x.responseText == 'y') location.reload(true);
-        else document.querySelector('font').innerHTML = 'The password you entered was incorrect.';
-    }
-    
-    eval("onload = (_=>document.querySelector('input').addEventListener('keydown',e=>(e.keyCode==13&&L())))");
-    
+	
+	function L(){
+		x = new XMLHttpRequest();
+		x.open('POST', '{{ url_for("gimme") }}', false);
+		x.send(document.querySelector('input').value);
+		
+		if (x.responseText == 'y') location.reload(true);
+		else document.querySelector('font').innerHTML = 'The password you entered was incorrect.';
+	}
+	
+	eval("onload = (_=>document.querySelector('input').addEventListener('keydown',e=>(e.keyCode==13&&L())))");
+	
 </script>
 
 Login as admin: <input type=password> <button onclick="L()"> login </button><br>

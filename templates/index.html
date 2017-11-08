@@ -1,35 +1,29 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Sign up for Prewired</title>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-        <link rel="stylesheet" type="text/css" href="//necolas.github.io/normalize.css/5.0.0/normalize.css">
-        <meta name="description" content="Sign up for Prewired">
-        <!--<script src="{{ url_for('static', filename='index.js') }}"></script>
-        <script>
-            var DATE = "{{ date }}";
-            var URI = "{{ url_for('yeeeeeha_json') }}";
-        </script>--!>
-    </head>
-    <body id=index>
-        <center>
-            <!--[if lte IE 7 ]>
-              <font color=red size=60> Your browser is not supported! Please upgrade to a more modern browser.</font><br>
-            <![endif]-->
-            <img src="//www.prewired.org/img/scotlandcol2.png" id=logo alt="PREWIRED">
-            <h1>Sign up for Prewired</h1>
-            <h3>On {{ date }}</h3>
-            {% if error %}
-            <div class=error>
-                {{ error|safe }}
-            </div>
-            {% endif %}
-            <form action="{{ url_for('yeeeeeha') }}">
-                <br>Your name: <input name=name type=text {%- if session.name %} value="{{ session.name }}" {% endif -%} >
-                <br><br>
-                <input type=submit value="I'm coming to Prewired!"><br><br>
-                First time? Please <a href="{{ url_for('register') }}">register</a>.
-            </form>
-        </center>
-    </body>
+	<head>
+		<title>Sign up for Prewired</title>
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+		<meta name="description" content="Sign up for Prewired">
+	</head>
+	<body id=index>
+		<center>
+			<!--[if lte IE 7 ]>
+			  <font color=red size=60> Your browser is not supported! Please upgrade to a more modern browser.</font><br>
+			<![endif]-->
+			
+			<h1>Sign up for Prewired</h1>
+			<h3>On {{ date }}</h3>
+			{% if error %}
+			<div class=error>
+				{{ error|safe }}
+			</div>
+			{% endif %}
+			<form action="{{ url_for('yeeeeeha') }}">
+				<br>Your name: <input name=name type=text {%- if session.name %} value="{{ session.name }}" {% endif -%} >
+				<br><br>
+				<input type=submit value="I'm going to Prewired!"><br><br>
+				First time? Please <a href="{{ url_for('register') }}">register</a>.
+			</form>
+		</center>
+	</body>
 </html>

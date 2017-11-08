@@ -1,71 +1,69 @@
 html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
+	margin: 0;
+	width: 100%;
 }
 
 body {
-    background-color: #EDEDED;
-    background-image: url("//www.prewired.org/img/dimension.png");
-    background-repeat: repeat;
+	background-color: #FDFDFD;
+	background-image: url("//www.prewired.org/img/dimension.png");
+	background-repeat: repeat;
 }
 
-#logo {
-    height: 200px;
-    margin: 2em;
+center {
+	margin-top: 10em;
 }
 
 .error {
-    width: 40%;
-    border: 5px solid #f00;
-    background-color: #EDEDED;
-    color: red;
-    padding: 1em;
+	width: 40%;
+	border: 5px solid #f00;
+	background-color: #EDEDED;
+	color: red;
+	padding: 1em;
 }
 
 #ierr {
-    position: absolute;
-    width: 350px;
-    left: calc(50% - 175px);
-    box-shadow: 10px 10px 5px gray;
-    padding: 2em;
-    background-color: #ff0000;
-    bottom: 120%;
-    color: white;
-    transition: bottom 1s ease-out;
+	position: absolute;
+	width: 350px;
+	left: calc(50% - 175px);
+	box-shadow: 10px 10px 5px gray;
+	padding: 2em;
+	background-color: #ff0000;
+	bottom: 120%;
+	color: white;
+	transition: bottom 1s ease-out;
 }
 
 #ierr > button {
-    float: right;
+	float: right;
 }
 
 #contentdiv {
-    width: 70%;
-    margin-left: 15%;
+	width: 70%;
+	margin-left: 15%;
 }
 
 .regfieldname {
-    width: 60%;
+	width: 60%;
 }
 
 .regfieldname + td {
-    float: right;
+	float: right;
 }
 
 #registerpage table, #registerpage tbody, #registerpage tr {
-    width: 100%;
+	width: 100%;
 }
 
 #registercomplete, #signedup {
-    height: auto !important;
+	height: auto !important;
 }
 
 #registercomplete > *, #signedup > * {
-    text-align: center;
+	text-align: center;
 }
 
 #registercomplete a {
-    text-decoration: none;
-    font-size: 110%;
-    font-weight: 500;
+	text-decoration: none;
+	font-size: 110%;
+	font-weight: 500;
 }

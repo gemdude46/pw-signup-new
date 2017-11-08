@@ -1,187 +1,187 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Admin Panel</title>
-        <style>
-            
-            html, body {
-                margin: 0;
-                font-family: verdana;
-            }
-            
-            #top {
-                padding: 0 1em;
-            }
-            
-            #top > b {
-                float: left;
-                font-size: 150%;
-            }
-            
-            #top > a {
-                float: right;
-            }
-            
-            #hr1 {
-                clear: both;
-            }
-            
-            
-            .tab {
-                display: inline-block;
-                text-align: center;
-                background-color: #ccc;
-                font-size: 120%;
-                cursor: pointer;
-            }
-            
-            .tab:hover {
-                background-color: #ddd;
-            }
-            
-            .tab.active {
-                background-color: #0c0;
-                color: white;
-            }
-            
-            #content {
-                padding: 5em 1em;
-                font-family: monospace;
-            }
-            
-            member, session {
-                cursor: pointer;
-                font-weight: bold;
-            }
-        </style>
-        <script>
-            
-            var tabs = ['Home', 'Members', 'Sessions'], ctab;
-            
-            var cont;
-            
-            function ngt(a, b) {
-                var a_a, b_a, a_l, b_l;
-                
-                a_a = a.split(' ');
-                a_l = a_a[a_a.length - 1];
-                
-                b_a = b.split(' ');
-                b_l = b_a[b_a.length - 1];
-                
-                a_l = a_l.toLowerCase();
-                b_l = b_l.toLowerCase();
-                
-                return a_l > b_l ? 1 : -1;
-            }
-            
-            function GETJSON(uri, cb){
-                r = new XMLHttpRequest();
-                r.open('GET', uri, true);
-                r.onreadystatechange = (_=>r.readyState==4&&cb(JSON.parse(r.responseText)));
-                r.send(null);
-            }
-            
-            onload = function(){
-                cont = document.querySelector('#content');
-            
-                document.styleSheets[0].insertRule('.tab{width:' + 100/tabs.length + '%;}', 0);
-                document.querySelector('#tabs').innerHTML =
-                    tabs.map(x=>'<div class=tab tab="X" onclick="setTab(\'X\')">X</div>'.replace(/X/g, x)).join('');
-                
-                setTab(tabs[0]);
-            };
-            
-            function setTab(tab, noAct) {
-                ctab = tab;
-                Array.from(document.querySelectorAll('.tab')).forEach(x=>x.classList.remove('active'));
-                document.querySelector('.tab[tab="'+tab+'"]').classList.add('active');
-                
-                cont.innerHTML = '';
-                
-                if (noAct) return;
-                
-                if (tab == 'Home') {
-                    GETJSON("{{ url_for('log_feed') }}", j=>
-                        ctab=='Home'&&(cont.innerHTML=j.length+
-                            ' logs. <button onclick="setTab(\'Home\')">Refresh</button> <button onclick="CL()">Clear All</button><hr><hr>'+
-                                j.sort((a,b)=>
-                                    Math.sign(b.timestamp-a.timestamp)).map(e=>
-                                        new Date(1000*e.timestamp)+': '+e.html).join('<hr>')));
-                }
-                
-                if (tab == 'Members') {
-                    GETJSON("{{ url_for('list_members') }}", j=>
-                        ctab=='Members'&&(cont.innerHTML=j.length+' members.<hr><hr>'+j.sort(ngt).map(m=>
-                             '<member>'+m+'</member>').join('<hr>')));
-                }
-                
-                if (tab == 'Sessions') {
-                    GETJSON("{{ url_for('list_sessions') }}", j=>
-                        ctab=='Sessions'&&(cont.innerHTML=j.length+' sessions.<hr><hr>'+j.sort((a,b)=>
-                            Math.sign(b.id-a.id)).map(s=>
-                                '<session>'+s.date+'</session>').join('<hr>')));
-                }
-            }
-            
-            setInterval(function(){
-                Array.from(document.querySelectorAll('session:not(.dun)')).forEach(function(x){
-                    x.addEventListener('click', _=>loadSession(x.textContent));
-                    x.classList.add('dun');
-                });
-                Array.from(document.querySelectorAll('member:not(.dun)')).forEach(function(x){
-                    x.addEventListener('click', _=>loadMember(x.textContent));
-                    x.classList.add('dun');
-                });
-            }, 100);
-            
-            function loadSession(s){
-                setTab('Sessions', true);
-                GETJSON("{{ url_for('went_to') }}?s=" + s, function(j){
-                    cont.innerHTML = '<h2>Prewired on ' + s + '</h2><p>' + j.length + ' people went:</p>' +
-                        j.sort(ngt).map(p=>'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<member>' + p + '</member>').join('<br>');
-                });
-            }
-            
-            function loadMember(m){
-                setTab('Members', true);
-                GETJSON("{{ url_for('who_is') }}?m=" + encodeURIComponent(m), function(j){
-                    cont.innerHTML = '<h2>' + m + '</h2><table><tbody id=mdat></tbody></table>';
-                    j.map(function(p){
-                        var tr = document.createElement('TR');
-                        var td1 = document.createElement('TD');
-                        var td2 = document.createElement('TD');
-                        
-                        td1.textContent = p[0];
-                        td2.textContent = p[1];
-                        
-                        td2.style['padding-left'] = '4em';
-                        
-                        tr.appendChild(td1);
-                        tr.appendChild(td2);
-                        
-                        return tr;
-                    }).forEach(e=>document.querySelector('#mdat').appendChild(e));
-                });
-            }
-            
-            function CL() {
-                confirm('Clear all logs?') && GETJSON("{{ url_for('log_clear') }}", j=>(ctab=='Home'&&setTab(ctab)));
-            }
-            
-        </script>
-    </head>
-    <body>
-        <div id=top>
-            <b>Admin Panel</b>
-            <a href="{{ url_for('admin_out') }}">Log out</a>
-        </div>
-        <hr id="hr1">
-        <br><br>
-        <div id=tabs></div>
-        
-        <div id=content>
-            
-        </div>
-    </body>
+	<head>
+		<title>Admin Panel</title>
+		<style>
+			
+			html, body {
+				margin: 0;
+				font-family: verdana;
+			}
+			
+			#top {
+				padding: 0 1em;
+			}
+			
+			#top > b {
+				float: left;
+				font-size: 150%;
+			}
+			
+			#top > a {
+				float: right;
+			}
+			
+			#hr1 {
+				clear: both;
+			}
+			
+			
+			.tab {
+				display: inline-block;
+				text-align: center;
+				background-color: #ccc;
+				font-size: 120%;
+				cursor: pointer;
+			}
+			
+			.tab:hover {
+				background-color: #ddd;
+			}
+			
+			.tab.active {
+				background-color: #0c0;
+				color: white;
+			}
+			
+			#content {
+				padding: 5em 1em;
+				font-family: monospace;
+			}
+			
+			member, session {
+				cursor: pointer;
+				font-weight: bold;
+			}
+		</style>
+		<script>
+			
+			var tabs = ['Home', 'Members', 'Sessions'], ctab;
+			
+			var cont;
+			
+			function ngt(a, b) {
+				var a_a, b_a, a_l, b_l;
+				
+				a_a = a.split(' ');
+				a_l = a_a[a_a.length - 1];
+				
+				b_a = b.split(' ');
+				b_l = b_a[b_a.length - 1];
+				
+				a_l = a_l.toLowerCase();
+				b_l = b_l.toLowerCase();
+				
+				return a_l > b_l ? 1 : -1;
+			}
+			
+			function GETJSON(uri, cb){
+				r = new XMLHttpRequest();
+				r.open('GET', uri, true);
+				r.onreadystatechange = (_=>r.readyState==4&&cb(JSON.parse(r.responseText)));
+				r.send(null);
+			}
+			
+			onload = function(){
+				cont = document.querySelector('#content');
+			
+				document.styleSheets[0].insertRule('.tab{width:' + 100/tabs.length + '%;}', 0);
+				document.querySelector('#tabs').innerHTML =
+					tabs.map(x=>'<div class=tab tab="X" onclick="setTab(\'X\')">X</div>'.replace(/X/g, x)).join('');
+				
+				setTab(tabs[0]);
+			};
+			
+			function setTab(tab, noAct) {
+				ctab = tab;
+				Array.from(document.querySelectorAll('.tab')).forEach(x=>x.classList.remove('active'));
+				document.querySelector('.tab[tab="'+tab+'"]').classList.add('active');
+				
+				cont.innerHTML = '';
+				
+				if (noAct) return;
+				
+				if (tab == 'Home') {
+					GETJSON("{{ url_for('log_feed') }}", j=>
+						ctab=='Home'&&(cont.innerHTML=j.length+
+							' logs. <button onclick="setTab(\'Home\')">Refresh</button> <button onclick="CL()">Clear All</button><hr><hr>'+
+								j.sort((a,b)=>
+									Math.sign(b.timestamp-a.timestamp)).map(e=>
+										new Date(1000*e.timestamp)+': '+e.html).join('<hr>')));
+				}
+				
+				if (tab == 'Members') {
+					GETJSON("{{ url_for('list_members') }}", j=>
+						ctab=='Members'&&(cont.innerHTML=j.length+' members.<hr><hr>'+j.sort(ngt).map(m=>
+							 '<member>'+m+'</member>').join('<hr>')));
+				}
+				
+				if (tab == 'Sessions') {
+					GETJSON("{{ url_for('list_sessions') }}", j=>
+						ctab=='Sessions'&&(cont.innerHTML=j.length+' sessions.<hr><hr>'+j.sort((a,b)=>
+							Math.sign(b.id-a.id)).map(s=>
+								'<session>'+s.date+'</session>').join('<hr>')));
+				}
+			}
+			
+			setInterval(function(){
+				Array.from(document.querySelectorAll('session:not(.dun)')).forEach(function(x){
+					x.addEventListener('click', _=>loadSession(x.textContent));
+					x.classList.add('dun');
+				});
+				Array.from(document.querySelectorAll('member:not(.dun)')).forEach(function(x){
+					x.addEventListener('click', _=>loadMember(x.textContent));
+					x.classList.add('dun');
+				});
+			}, 100);
+			
+			function loadSession(s){
+				setTab('Sessions', true);
+				GETJSON("{{ url_for('went_to') }}?s=" + s, function(j){
+					cont.innerHTML = '<h2>Prewired on ' + s + '</h2><p>' + j.length + ' people went:</p>' +
+						j.sort(ngt).map(p=>'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<member>' + p + '</member>').join('<br>');
+				});
+			}
+			
+			function loadMember(m){
+				setTab('Members', true);
+				GETJSON("{{ url_for('who_is') }}?m=" + encodeURIComponent(m), function(j){
+					cont.innerHTML = '<h2>' + m + '</h2><table><tbody id=mdat></tbody></table>';
+					j.map(function(p){
+						var tr = document.createElement('TR');
+						var td1 = document.createElement('TD');
+						var td2 = document.createElement('TD');
+						
+						td1.textContent = p[0];
+						td2.textContent = p[1];
+						
+						td2.style['padding-left'] = '4em';
+						
+						tr.appendChild(td1);
+						tr.appendChild(td2);
+						
+						return tr;
+					}).forEach(e=>document.querySelector('#mdat').appendChild(e));
+				});
+			}
+			
+			function CL() {
+				confirm('Clear all logs?') && GETJSON("{{ url_for('log_clear') }}", j=>(ctab=='Home'&&setTab(ctab)));
+			}
+			
+		</script>
+	</head>
+	<body>
+		<div id=top>
+			<b>Admin Panel</b>
+			<a href="{{ url_for('admin_out') }}">Log out</a>
+		</div>
+		<hr id="hr1">
+		<br><br>
+		<div id=tabs></div>
+		
+		<div id=content>
+			
+		</div>
+	</body>
 </html>

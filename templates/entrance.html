@@ -1,129 +1,129 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title> Welcome to Prewired </title>
-        <style>
-            #a {
-                background: linear-gradient(#0cd,#0cd,#0ad);
-                color: #fff;
-                font-size: 50px;
-                text-align: center;
-                height: 60px;
-            }
-            
-            #b {
-                height: calc(100vh - 60px);
-                overflow: auto;
-            }
-            
-            #b * {
-                font-weight: 555;
-                font-size: 1%;
-                border-bottom: 1px solid #ddd;
-                padding: 0.4em;
-                transition: background-color 0.5s ease-out, font-size 0.5s;
-            }
-            
-            .h {
-                background-color: #1f1;
-            }
-            
-        </style>
-        <script>
-            
-            var displayed_users = [];
-            
-            var b;
-            
-            var evtq = [];
-            
-            function ngt(a, b) {
-                var a_a, b_a, a_l, b_l;
-                
-                a_a = a.split(' ');
-                a_l = a_a[a_a.length - 1];
-                
-                b_a = b.split(' ');
-                b_l = b_a[b_a.length - 1];
-                
-                a_l = a_l.toLowerCase();
-                b_l = b_l.toLowerCase();
-                
-                return a_l > b_l;
-            }
-            
-            function tf(){
-                var r = new XMLHttpRequest();
-                
-                r.open('POST', "{{ url_for('stream') }}", true);
-                
-                r.onreadystatechange = function(){
-                    if (r.readyState == 4) {
-                        var j = JSON.parse(r.responseText);
-                        
-                        j.forEach(function(p){
-                            if (displayed_users.indexOf(p.name) == -1) {
-                                var div = document.createElement('DIV');
-                                div.textContent = p.name;
-                                
-                                div.addEventListener('click', function(){
-                                    evtq.push({type: 'tap', target: div.textContent});
-                                });
-                                
-                                setTimeout(function(){
-                                    div.style['font-size'] = '200%';
-                                }, 200);
-                                
-                                var b4;
-                                
-                                for (var i = b.children.length - 1; i > -1; i--) {
-                                    var c = b.children[i];
-                                    if (ngt(c.textContent, p.name)) b4 = c;
-                                }
-                                
-                                if (b4) {
-                                    b.insertBefore(div, b4);
-                                } else {
-                                    b.appendChild(div);
-                                }
-                                
-                                displayed_users.push(p.name);
-                            }
-                        });
-                        
-                        j.forEach(function(p){
-                            var e;
-                            for (var i = 0; i < b.children.length; i++) {
-                                if (b.children[i].textContent == p.name) {
-                                    e = b.children[i];
-                                    break;
-                                }
-                            }
-                            
-                            var clr = ['#EEE', '#2F2', '#F22'][p.state];
-                            if (e.style['background-color'] != clr) {
-                                e.style['background-color'] = clr;
-                            }
-                        });
-                        
-                        setTimeout(tf, 100);
-                    }
-                };
-                
-                r.send(JSON.stringify(evtq));
-                evtq = [];
-            }
-            
-            onload = function(){
-                b = document.getElementById('b');
-                tf();
-            };
-                        
-        </script>
-    </head>
-    <body style="margin: 0; font-family: verdana;">
-        <div id=a>Prewired</div>
-        <div id=b></div>
-    </body>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title> Welcome to Prewired </title>
+		<style>
+			#a {
+				background: linear-gradient(#0cd,#0cd,#0ad);
+				color: #fff;
+				font-size: 50px;
+				text-align: center;
+				height: 60px;
+			}
+			
+			#b {
+				height: calc(100vh - 60px);
+				overflow: auto;
+			}
+			
+			#b * {
+				font-weight: 555;
+				font-size: 1%;
+				border-bottom: 1px solid #ddd;
+				padding: 0.4em;
+				transition: background-color 0.5s ease-out, font-size 0.5s;
+			}
+			
+			.h {
+				background-color: #1f1;
+			}
+			
+		</style>
+		<script>
+			
+			var displayed_users = [];
+			
+			var b;
+			
+			var evtq = [];
+			
+			function ngt(a, b) {
+				var a_a, b_a, a_l, b_l;
+				
+				a_a = a.split(' ');
+				a_l = a_a[a_a.length - 1];
+				
+				b_a = b.split(' ');
+				b_l = b_a[b_a.length - 1];
+				
+				a_l = a_l.toLowerCase();
+				b_l = b_l.toLowerCase();
+				
+				return a_l > b_l;
+			}
+			
+			function tf(){
+				var r = new XMLHttpRequest();
+				
+				r.open('POST', "{{ url_for('stream') }}", true);
+				
+				r.onreadystatechange = function(){
+					if (r.readyState == 4) {
+						var j = JSON.parse(r.responseText);
+						
+						j.forEach(function(p){
+							if (displayed_users.indexOf(p.name) == -1) {
+								var div = document.createElement('DIV');
+								div.textContent = p.name;
+								
+								div.addEventListener('click', function(){
+									evtq.push({type: 'tap', target: div.textContent});
+								});
+								
+								setTimeout(function(){
+									div.style['font-size'] = '200%';
+								}, 200);
+								
+								var b4;
+								
+								for (var i = b.children.length - 1; i > -1; i--) {
+									var c = b.children[i];
+									if (ngt(c.textContent, p.name)) b4 = c;
+								}
+								
+								if (b4) {
+									b.insertBefore(div, b4);
+								} else {
+									b.appendChild(div);
+								}
+								
+								displayed_users.push(p.name);
+							}
+						});
+						
+						j.forEach(function(p){
+							var e;
+							for (var i = 0; i < b.children.length; i++) {
+								if (b.children[i].textContent == p.name) {
+									e = b.children[i];
+									break;
+								}
+							}
+							
+							var clr = ['#EEE', '#2F2', '#F22'][p.state];
+							if (e.style['background-color'] != clr) {
+								e.style['background-color'] = clr;
+							}
+						});
+						
+						setTimeout(tf, 100);
+					}
+				};
+				
+				r.send(JSON.stringify(evtq));
+				evtq = [];
+			}
+			
+			onload = function(){
+				b = document.getElementById('b');
+				tf();
+			};
+						
+		</script>
+	</head>
+	<body style="margin: 0; font-family: verdana;">
+		<div id=a>Prewired</div>
+		<div id=b></div>
+	</body>
 </html>
