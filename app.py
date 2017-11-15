@@ -179,7 +179,11 @@ def yeeeeeha_int():
 @app.route('/yeeeeeha')
 def yeeeeeha():
 	e = yeeeeeha_int()
-	if isinstance(e, basestring): return index(e)
+	if isinstance(e, basestring):
+		if e == 'Sorry, but Prewired has already been fully booked for this week.':
+			return render_template('full.html')
+
+		return index(e)
 
 	session['name'] = e.name
 	return render_template('yeeeeeha.html')
