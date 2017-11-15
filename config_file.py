@@ -1,4 +1,6 @@
 
+capacity = 4
+
 admin_password = '$2b$12$Rz9Z4HWX4cU4COBr9dUIv.IcA3VpNAeUqvCJY9063apFrVwjVhI9m'
 
 database_URI = 'sqlite:///db.db'

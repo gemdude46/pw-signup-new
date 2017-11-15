@@ -19,7 +19,7 @@ def NameCase(name):
 	name = u' ' + name.lower()
 	for i in xrange(26):
 		name = name.replace(u' ' + string.ascii_lowercase[i], u' ' + string.ascii_uppercase[i])
-	name = name.replace(u'<', unichr(9001)).replace(u'>', unichr(9002)).replace(u'&', u'+')
+	name = name.replace(u'<', unichr(9001)).replace(u'>', unichr(9002)).replace(u'&', unichr(65286))
 	return u' '.join(name.split())
 
 app = Flask(__name__)
@@ -27,10 +27,31 @@ app.config['SQLALCHEMY_DATABASE_URI'] = cfg.database_URI
 app.config['SECRET_KEY'] = cfg.secret_key
 db = SQLAlchemy(app)
 
-classf = '''
+
 class Member(db.Model):
 	id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
-%s
+	name = db.Column(db.String(80))
+	email = db.Column(db.String(80))
+	mobile = db.Column(db.String(16))
+	allergies = db.Column(db.String(256))
+	medication = db.Column(db.String(256))
+	conditions = db.Column(db.String(256))
+	website = db.Column(db.String(80))
+	dob = db.Column(db.String(16))
+	disabilities = db.Column(db.String(80))
+	postcode = db.Column(db.String(16))
+	gender = db.Column(db.String(80))
+	ethnicity = db.Column(db.String(80))
+	religion = db.Column(db.String(80))
+	emergency_contact_1_name = db.Column(db.String(80))
+	emergency_contact_1_relation = db.Column(db.String(80))
+	emergency_contact_1_phone = db.Column(db.String(16))
+	emergency_contact_1_email = db.Column(db.String(80))
+	emergency_contact_2_name = db.Column(db.String(80))
+	emergency_contact_2_relation = db.Column(db.String(80))
+	emergency_contact_2_phone = db.Column(db.String(16))
+	emergency_contact_2_email = db.Column(db.String(80))
+
 	photo = db.Column(db.Boolean)
 	by_parent = db.Column(db.Boolean)
 	registered = db.Column(db.Integer)
@@ -50,18 +71,10 @@ class Member(db.Model):
 		it = ''
 		for f in self.__dict__:
 			if not f[0] == '_':
-				it += '<tr><td>%%s</td><td>%%s</td></tr>' %% (f.replace('_', ' '), self.__dict__[f])
-		return '<table><tbody>%%s</tbody></table>' %% it
-'''
+				it += '<tr><td>%s</td><td>%s</td></tr>' % (f.replace('_', ' '), self.__dict__[f])
+		return '<table><tbody>%s</tbody></table>' % it
 
-classd = ''
 
-for field in cfg.fields:
-	if not field['intname'].startswith('ignore'):
-		cs = 'db.Column(db.String(%r))' % field.get('length', 80)
-		classd += '	%s = %s\n' % (field['intname'], cs)
-
-exec classf % classd
 
 class PWSession(db.Model):
 	id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
@@ -148,8 +161,13 @@ def yeeeeeha_int():
 	pws_id = get_pws(get_next_pw()).id
 	
 	if GoingTo.query.filter_by(usr_id=m[0].id, pws_id=pws_id).first():
-		log('<member>%s</member> Attempted to register for Prewired on <session>%s</session>, but was already going.' % (m[0].name, get_next_pw()))
+		log('<member>%s</member> attempted to register for Prewired on <session>%s</session>, but was already going.' % (m[0].name, get_next_pw()))
 	else:
+		
+		if len(GoingTo.query.filter_by(pws_id=pws_id).all()) == cfg.capacity:
+			log('<member>%s</member> attempted to register for Prewired on <session>%s</session>, but it was full' % (m[0].name,get_next_pw()))
+			return 'Sorry, but Prewired has already been fully booked for this week.'
+
 		gt = GoingTo(m[0].id, pws_id)
 		db.session.add(gt)
 		
