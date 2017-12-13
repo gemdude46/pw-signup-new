@@ -21,6 +21,14 @@
 			<form action="{{ url_for('yeeeeeha') }}">
 				<br>Your name: <input name=name type=text {%- if session.name %} value="{{ session.name }}" {% endif -%} >
 				<br><br>
+				<fieldset class="captcha">
+				<legend>Please fill out this CAPTCHA to prove you are human:</legend>
+				<br>
+				<img class="captcha" src="data:image/png;base64,{{ captcha|safe }}" alt="CAPTCHA"><br><br>
+				<input type=hidden name=captcha value="{{ rstr }}">
+				<input type=text name="{{ rstr }}"><br>
+				</fieldset>
+				<br><br>
 				<input type=submit value="I'm going to Prewired!"><br><br>
 				First time? Please <a href="{{ url_for('register') }}">register</a>.
 			</form>

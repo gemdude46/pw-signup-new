@@ -1,10 +1,43 @@
-from flask import Flask, request, render_template, session, abort, Response
+from flask import Flask, request, render_template, session, abort, Response, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-import config_file as cfg
+import yaml
 import datetime, time
 import string, json
 import bcrypt
 import sys
+import os
+import random
+from captcha.image import ImageCaptcha
+
+icgen = ImageCaptcha(fonts=[os.path.join('fonts', fn) for fn in os.listdir('fonts') if fn.endswith('.ttf')])
+
+cfg = yaml.load(open('cfg.yaml', 'r'))
+
+r_fields = [
+	dict(dispname="Full Name:", intname="name", type="text", required=True),
+	dict(dispname="Email Address:", intname="email", type="email", required=True),
+	dict(dispname="Mobile Phone Number:", intname="mobile", type="text", length=16),
+	dict(dispname="Any allergies or specific dietary requirements?", intname="allergies", type="text", length=256),
+	dict(dispname="Any medication it would be useful for us to know about?", intname="medication", type="text", length=256),
+	dict(dispname="Any illnesses, injuries or conditions that it would be useful for us to know about?", intname="conditions", type="text", length=256),
+	dict(dispname="A website, blog, etc?", intname="website", type="text"),
+	dict(dispname="Partial date of birth (Month/Year):", intname="dob", type="text", pad=True, length=16),
+	dict(dispname="Any disabilities?", intname="disabilities", type="text"),
+	dict(dispname="Place of Residence Postcode:", intname="postcode", type="text", length=16),
+	dict(dispname="Gender:", intname="gender", type="text"),
+	dict(dispname="Ethnicity:", intname="ethnicity", type="text"),
+	dict(dispname="Religion:", intname="religion", type="text"),
+	dict(dispname="Emergency Contact 1:", intname="ignore_ec1", type="hidden", pad=True),
+	dict(dispname="Name:", intname="emergency_contact_1_name", type="text", required=True, indent=True),
+	dict(dispname="Relation to Member:", intname="emergency_contact_1_relation", type="text", required=True, indent=True),
+	dict(dispname="Phone Number:", intname="emergency_contact_1_phone", type="text", required=True, indent=True, length=16),
+	dict(dispname="Email:", intname="emergency_contact_1_email", type="email", required=True, indent=True),
+	dict(dispname="Emergency Contact 2:", intname="ignore_ec2", type="hidden", pad=True),
+	dict(dispname="Name:", intname="emergency_contact_2_name", type="text", required=True, indent=True),
+	dict(dispname="Relation to Member:", intname="emergency_contact_2_relation", type="text", required=True, indent=True),
+	dict(dispname="Phone Number:", intname="emergency_contact_2_phone", type="text", required=True, indent=True, length=16),
+	dict(dispname="Email:", intname="emergency_contact_2_email", type="email", required=True, indent=True)
+]
 
 def next_weekday(d, weekday):
 	days_ahead = weekday - d.weekday()
@@ -12,8 +45,11 @@ def next_weekday(d, weekday):
 		days_ahead += 7
 	return d + datetime.timedelta(days_ahead)
 
+def get_next_pw_dt():
+	return next_weekday(datetime.date.today(), 2)
+
 def get_next_pw():
-	return '{0.day}/{0.month}/{0.year}'.format(next_weekday(datetime.date.today(), 2))
+	return '{0.day}/{0.month}/{0.year}'.format(get_next_pw_dt())
 
 def NameCase(name):
 	name = u' ' + name.lower()
@@ -23,8 +59,8 @@ def NameCase(name):
 	return u' '.join(name.split())
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = cfg.database_URI
-app.config['SECRET_KEY'] = cfg.secret_key
+app.config['SQLALCHEMY_DATABASE_URI'] = cfg['database_URI']
+app.config['SECRET_KEY'] = cfg['secret_key']
 db = SQLAlchemy(app)
 
 
@@ -61,7 +97,7 @@ class Member(db.Model):
 		self.registered = int(time.time())
 		self.photo = form.get('photo') == 'yes'
 		self.by_parent = form.get('registered_by') == 'parent'
-		for f in cfg.fields:
+		for f in r_fields:
 			if 'name' in f['intname']:
 				self.__dict__[f['intname']] = NameCase(form.get(f['intname']))
 			elif not f['intname'].startswith('ignore'):
@@ -113,11 +149,52 @@ class LoggedEvent(db.Model):
 	def json(self):
 		return json.dumps({"timestamp":self.timestamp, "html":self.html})
 
+class Captcha(db.Model):
+	id = db.Column(db.String(16), unique=True, primary_key=True)
+	nbr = db.Column(db.Integer)
+	timestamp = db.Column(db.Integer)
+	__tablename__ = 'Captcha'
+
+	def __init__(self, cid, nbr):
+		self.id = cid
+		self.nbr = nbr
+		self.timestamp = int(time.time())
+
+
 def log(msg):
 	evt = LoggedEvent(msg)
 	db.session.add(evt)
 	db.session.commit()
 	return evt
+
+def register_captcha(cid, nbr):
+	cobj = Captcha(cid, nbr)
+	db.session.add(cobj)
+	db.session.commit()
+
+def check_captcha(cid, nbr):
+	cobj = Captcha.query.filter_by(id=cid).first()
+	if not cobj:
+		return False
+	
+	correct = str(nbr) == str(cobj.nbr)
+
+	db.session.delete(cobj)
+	db.session.commit()
+
+	return correct
+
+def wipe_old_captchas():
+	earliest_allowed = time.time() - 700000
+
+	flag = False
+	for cobj in Captcha.query.all():
+		if cobj.timestamp < earliest_allowed:
+			db.session.delete(cobj)
+			flag = True
+	
+	if flag:
+		db.session.commit()
 
 def newMember(f):
 	m = Member(f)
@@ -147,7 +224,21 @@ def make_session_permanent():
 
 @app.route('/')
 def index(error=''):
-	return render_template('index.html', date=get_next_pw(), error=error)
+	
+	if (get_next_pw_dt() == datetime.date.today()
+	  and datetime.datetime.now().time() > datetime.time(cfg['sign_up_end']['hour'], cfg['sign_up_end']['minute'], 0, 0)):
+		return render_template('late.html')
+	
+	
+	number = random.randint(1000, 9999)
+	captcha = icgen.generate(str(number))
+	binary = captcha.read()
+	b64 = binary.encode('base64').replace('\n', '')
+
+	rstr = str(random.randint(0,2000000000))
+	register_captcha(rstr, number)
+
+	return render_template('index.html', date=get_next_pw(), error=error, captcha=b64, rstr=rstr)
 
 def yeeeeeha_int():
 	if 'name' not in request.args or not request.args['name']:
@@ -158,13 +249,16 @@ def yeeeeeha_int():
 		return 'Sorry, but you don\'t appear to be a registered member. Check for\
 			typos in your name, or <a href="register">register</a> if you haven\'t already.'
 	
+	if not check_captcha(request.args['captcha'], request.args.get(request.args['captcha']).strip()):
+		return 'Please check you have filled out the CAPTCHA below correctly.'
+
 	pws_id = get_pws(get_next_pw()).id
 	
 	if GoingTo.query.filter_by(usr_id=m[0].id, pws_id=pws_id).first():
 		log('<member>%s</member> attempted to register for Prewired on <session>%s</session>, but was already going.' % (m[0].name, get_next_pw()))
 	else:
 		
-		if len(GoingTo.query.filter_by(pws_id=pws_id).all()) == cfg.capacity:
+		if len(GoingTo.query.filter_by(pws_id=pws_id).all()) == cfg['capacity']:
 			log('<member>%s</member> attempted to register for Prewired on <session>%s</session>, but it was full' % (m[0].name,get_next_pw()))
 			return 'Sorry, but Prewired has already been fully booked for this week.'
 
@@ -197,11 +291,11 @@ def yeeeeeha_json():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 	if request.method == 'GET':
-		return render_template('register.html', fields=cfg.fields)
+		return render_template('register.html', fields=r_fields)
 	else:
-		for f in cfg.fields:
+		for f in r_fields:
 			if f.get('required') and not request.form.get(f['intname']):
-				return render_template('register.html', fields=cfg.fields, err=True)
+				return render_template('register.html', fields=r_fields, err=True)
 				
 		if getMembers(name=NameCase(request.form.get('name'))):
 			return render_template('eviltwin.html')
@@ -212,7 +306,7 @@ def register():
 
 @app.route('/favicon.ico')
 def favicon():
-	return cfg.ico
+	return redirect(url_for('static', filename='favicon.ico'))
 
 def req_admin():
 	if session.get('admin') != 'y':
@@ -224,7 +318,7 @@ def login(e):
 
 @app.route('/gimme', methods=['POST'])
 def gimme():
-	if bcrypt.hashpw(request.get_data(), cfg.admin_password) == cfg.admin_password:
+	if bcrypt.hashpw(request.get_data(), cfg['admin_password_bcrypt']) == cfg['admin_password_bcrypt']:
 		session['admin'] = 'y'
 		return 'y'
 	return 'n'
@@ -278,7 +372,7 @@ def who_is():
 			[
 				(unichr(160)*4 if f.get('indent') else '') + f['dispname'],
 				'' if f['intname'].startswith('ignore') else m.__dict__[f['intname']]
-			] for f in cfg.fields
+			] for f in r_fields
 		] + [
 			['Consents to photos', str(m.photo)],
 			['Registered by a parent or guardian', str(m.by_parent)]
@@ -288,6 +382,7 @@ def who_is():
 @app.route('/entrance/')
 def entrance():
 	req_admin()
+	wipe_old_captchas() 
 	return render_template('entrance.html')
 
 @app.route('/entrance/stream', methods=['POST'])

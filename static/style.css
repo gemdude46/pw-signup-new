@@ -10,7 +10,17 @@ body {
 }
 
 center {
-	margin-top: 10em;
+	margin-top: 5em;
+}
+
+fieldset.captcha {
+	width: 30em;
+	max-width: 70%;
+	text-align: left;
+}
+
+img.captcha {
+	box-shadow: 0 0 4px #555;
 }
 
 .error {
